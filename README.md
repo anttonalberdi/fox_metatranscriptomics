@@ -32,7 +32,7 @@ cd ../../../
 ```
 
 ## Prepare microbial genomes
-Store the microbial genomes in a single file called: 'resources/reference/microbiome/MAG.fa'.
+Store the microbial genomes in a single file called: 'resources/reference/microbiome/MAGs.fa'.
 
 ## Run snakemake
 ```sh
