@@ -49,6 +49,5 @@ snakemake \
     --keep-going \
     --notemp \
     --slurm \
-    --profile config/profile \
     --latency-wait 60
 ```
