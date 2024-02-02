@@ -2,8 +2,8 @@
 import os
 from glob import glob
 
-SAMPLE = [os.path.basename(fn).replace("_1.fastq.gz", "")
-            for fn in glob(f"resources/reads/*_1.fastq.gz")]
+SAMPLE = [os.path.basename(fn).replace("_1.fq.gz", "")
+            for fn in glob(f"resources/reads/*_1.fq.gz")]
 
 print("Detected the following samples:")
 print(SAMPLE)
