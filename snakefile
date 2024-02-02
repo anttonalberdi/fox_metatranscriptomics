@@ -90,10 +90,11 @@ rule star_mapping:
         r2 = "results/star/{sample}_2.fq.gz",
         host_bam = "results/star/{sample}_host.bam"
     params:
+        r1 = "results/star/{sample}_1.fq.",
+        r2 = "results/star/{sample}_2.fq",
         gene_counts = "results/star/{sample}_read_counts.tsv",
-        sj = "results/star/{sample}_SJ.tsv",
-        host_genome = "resources/reference/XXXXXXX",
-    conda:
+        sj = "results/star/{sample}_SJ.tsv"
+   conda:
         "environment.yaml"
     threads:
         40
@@ -120,17 +121,17 @@ rule star_mapping:
         mv {wildcards.sample}Aligned.out.bam {output.host_bam}
         mv {wildcards.sample}ReadsPerGene.out.tab {params.gene_counts}
         mv {wildcards.sample}SJ.out.tab {params.sj}
-        mv {wildcards.sample}Unmapped.out.mate1 {output.r1}
-        mv {wildcards.sample}Unmapped.out.mate2 {output.r2}
+        mv {wildcards.sample}Unmapped.out.mate1 {params.r1}
+        mv {wildcards.sample}Unmapped.out.mate2 {params.r2}
 
         # Compress non-host reads
         pigz \
             -p {threads} \
-            {params.r1rn}
+            {output.r1}
 
         pigz \
             -p {threads} \
-            {params.r2rn}
+            {output.r1}
         """
 
 ################################################################################
