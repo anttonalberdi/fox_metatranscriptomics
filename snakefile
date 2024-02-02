@@ -79,6 +79,7 @@ rule star_index:
          "Indexing host genome"
      shell:
          """
+        mkdir {output}
         STAR \
             --runMode genomeGenerate \
             --runThreadN {threads} \
