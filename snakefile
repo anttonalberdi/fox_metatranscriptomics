@@ -11,8 +11,7 @@ print(SAMPLE)
 ### Setup the desired outputs
 rule all:
     input:
-        "results/coverm/coverM_per_gene.txt",
-        "results/coverm/coverM_overall_mapping.txt"
+        "results/coverm/gene_counts.tsv"
         
 ################################################################################
 ### Filter reads with fastp
@@ -21,18 +20,16 @@ rule fastp:
         r1i = "resources/reads/{sample}_1.fastq.gz",
         r2i = "resources/reads/{sample}_2.fastq.gz"
     output:
-        r1o = temp("results/fastp/{sample}_trimmed_1.fastq.gz"),
-        r2o = temp("results/fastp/{sample}_trimmed_2.fastq.gz"),
+        r1o = temp("results/fastp/{sample}_1.fastq.gz"),
+        r2o = temp("results/fastp/{sample}_2.fastq.gz"),
         fastp_html = "results/fastp/{sample}.html",
         fastp_json = "results/fastp/{sample}.json"
     conda:
         "Transcriptomics_conda.yaml"
     threads:
         10
-    benchmark:
-        "3_Outputs/0_Logs/{sample}_fastp.benchmark.tsv"
     log:
-        "3_Outputs/0_Logs/{sample}_fastp.log"
+        "logs/{sample}_fastp.log"
     message:
         "Using FASTP to trim adapters and low quality sequences for {wildcards.sample}"
     shell:
@@ -52,47 +49,47 @@ rule fastp:
             --adapter_sequence_r2 CTGTCTCTTATACACATCT \
         &> {log}
         """
-################################################################################
+
 ## Index host genomes:
 # rule index_ref:
-#     input:
-#         "1_References"
-#     output:
-#         bt2_index = "1_References/CattedRefs.fna.gz.rev.2.bt2l",
-#         catted_ref = "1_References/CattedRefs.fna.gz"
-#     conda:
-#         "1_QC.yaml"
-#     threads:
-#         40
-#     log:
-#         "3_Outputs/0_Logs/host_genome_indexing.log"
-#     message:
-#         "Concatenating and indexing host genomes with Bowtie2"
-#     shell:
-#         """
-#         # Concatenate input reference genomes
-#         cat {input}/*.gz > {input}/CattedRefs.fna.gz
-#
-#         # Index catted genomes
-#         bowtie2-build \
-#             --large-index \
-#             --threads {threads} \
-#             {output.catted_ref} {output.catted_ref} \
-#         &> {log}
-#         """
-################################################################################
+     input:
+         "resources/reference/host"
+     output:
+         bt2_index = "resources/reference/host/CattedRefs.fna.gz.rev.2.bt2l",
+         catted_ref = "resources/reference/host/CattedRefs.fna.gz"
+     conda:
+         "1_QC.yaml"
+     threads:
+         40
+     log:
+         "3_Outputs/0_Logs/host_genome_indexing.log"
+     message:
+         "Concatenating and indexing host genomes with Bowtie2"
+     shell:
+         """
+         # Concatenate input reference genomes
+         cat {input}/*.gz > {input}/CattedRefs.fna.gz
+
+         # Index catted genomes
+         bowtie2-build \
+             --large-index \
+             --threads {threads} \
+             {output.catted_ref} {output.catted_ref} \
+         &> {log}
+         """
+
 ### Map to host reference genome using STAR
 rule STAR_host_mapping:
     input:
-        r1i = "results/fastp/{sample}_trimmed_1.fastq.gz",
-        r2i = "results/fastp/{sample}_trimmed_2.fastq.gz"
+        r1i = "results/fastp/{sample}_1.fastq.gz",
+        r2i = "results/fastp/{sample}_2.fastq.gz"
     output:
-        non_host_r1 = "results/star/{sample}_non_host_1.fastq.gz",
-        non_host_r2 = "results/star/{sample}_non_host_2.fastq.gz",
+        non_host_r1 = "results/star/{sample}_1.fastq.gz",
+        non_host_r2 = "results/star/{sample}_2.fastq.gz",
         host_bam = "results/star/{sample}_host.bam"
     params:
-        r1rn = "results/star/{sample}_non_host_1.fastq",
-        r2rn = "results/star/{sample}_non_host_2.fastq",
+        r1rn = "results/star/{sample}_1.fastq",
+        r2rn = "results/star/{sample}_2.fastq",
         gene_counts = "results/star/{sample}_read_counts.tsv",
         sj = "results/star/{sample}_SJ.tsv",
         host_genome = "resources/reference/XXXXXXX",
@@ -100,10 +97,8 @@ rule STAR_host_mapping:
         "Transcriptomics_conda.yaml"
     threads:
         40
-    benchmark:
-        "3_Outputs/0_Logs/{sample}_host_mapping.benchmark.tsv"
     log:
-        "3_Outputs/0_Logs/{sample}_host_mapping.log"
+        "logs/{sample}_star.log"
     message:
         "Mapping {wildcards.sample} to host genome using STAR"
     shell:
@@ -164,10 +159,8 @@ rule DRAM:
     resources:
         mem_gb=24,
         time='04:00:00'
-    benchmark:
-        "3_Outputs/0_Logs/{MAG}_DRAM.benchmark.tsv"
     log:
-        "3_Outputs/0_Logs/{MAG}_DRAM.log"
+        "logs/dram.log"
     message:
         "Using DRAM to functionally annotate {wildcards.MAG}"
     shell:
@@ -267,8 +260,8 @@ rule index_MAGs:
 ### Map non-host reads to DRAM genes files using Bowtie2
 rule bowtie2_MAG_mapping:
     input:
-        non_host_r1 = "results/star/{sample}_non_host_1.fastq.gz",
-        non_host_r2 = "results/star/{sample}_non_host_2.fastq.gz",
+        non_host_r1 = "results/star/{sample}_1.fastq.gz",
+        non_host_r2 = "results/star/{sample}_2.fastq.gz",
         bt2_index = "resources/reference/MAG_genes.fna.gz.rev.2.bt2l"
     output:
         bam = "results/bowtie/{sample}.bam"
@@ -278,10 +271,8 @@ rule bowtie2_MAG_mapping:
         "Transcriptomics_conda.yaml"
     threads:
         20
-    benchmark:
-        "3_Outputs/0_Logs/{sample}_MAG_genes_mapping.benchmark.tsv"
     log:
-        "3_Outputs/0_Logs/{sample}_MAG_genes_mapping.log"
+        "logs/{sample}_bowtie.log"
     message:
         "Mapping {wildcards.sample} to MAG genes using Bowtie2"
     shell:
@@ -303,8 +294,7 @@ rule coverM_MAG_genes:
     input:
         expand("results/bowtie/{sample}.bam", sample=SAMPLE),
     output:
-        gene_counts = "results/coverm/coverM_per_gene.txt",
-        total_cov = "results/coverm/coverM_overall_mapping.txt"
+        gene_counts = "results/coverm/gene_counts.tsv",
     params:
     conda:
         "Transcriptomics_conda.yaml"
@@ -314,16 +304,6 @@ rule coverM_MAG_genes:
         "Calculating MAG gene mapping rate using CoverM"
     shell:
         """
-        # Get overall mapping rate
-        coverm genome \
-            -b {input} \
-            -s _ \
-            -m relative_abundance \
-            -t {threads} \
-            --min-covered-fraction 0 \
-            > {output.total_cov}
-
-        # Get counts to specific genes too:
         coverm contig \
             -b {input} \
             -m count \
