@@ -60,8 +60,8 @@ rule fastp:
 ## Index host genomes:
 rule star_index:
      input:
-            genome="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.fna.gz",
-            annotation="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.gtf.gz"
+            genome="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.fna",
+            annotation="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.gtf"
      output:
             folder=directory("resources/reference/host/index")
      conda:
