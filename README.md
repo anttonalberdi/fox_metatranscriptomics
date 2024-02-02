@@ -9,7 +9,7 @@ module load mamba/1.5.6 snakemake/7.20.0
 
 # Clone this repository to the base directory
 cd greenland_shotgun
-git clone https://github.com/3d-omics/mg_assembly.git
+git clone https://github.com/anttonalberdi/fox_metatranscriptomics.git
 cd fox_metatranscriptomics
 
 # Create screen session 
@@ -17,8 +17,10 @@ screen -S fox_metatranscriptomics
 
 ```
 
-## Get reference genome and annotation
+## Prepare reads
+Store reads in the 'resources/reference/host' directory.
 
+## Prepare host genome
 Fox genome: https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_003160815.1/
 Store the files in the 'resources/reference/host' directory.
 
@@ -29,3 +31,24 @@ wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/003/160/815/GCF_003160815.1_Vu
 cd ../../../
 ```
 
+## Prepare microbial genomes
+Store the microbial genomes in a single file called: 'resources/reference/microbiome/MAG.fa'.
+
+## Run snakemake
+```sh
+# Reopen screen session if needed
+screen -r fox_metatranscriptomics
+
+#Run snakemake
+snakemake \
+    --use-conda \
+    --conda-frontend mamba \
+    --rerun-incomplete \
+    --jobs 100 \
+    --cores 96 \
+    --keep-going \
+    --notemp \
+    --slurm \
+    --profile config/profile \
+    --latency-wait 60
+```
