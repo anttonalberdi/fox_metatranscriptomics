@@ -17,15 +17,15 @@ rule all:
 ### Filter reads with fastp
 rule fastp:
     input:
-        r1i = "resources/reads/{sample}_1.fastq.gz",
-        r2i = "resources/reads/{sample}_2.fastq.gz"
+        r1 = "resources/reads/{sample}_1.fastq.gz",
+        r2 = "resources/reads/{sample}_2.fastq.gz"
     output:
-        r1o = temp("results/fastp/{sample}_1.fastq.gz"),
-        r2o = temp("results/fastp/{sample}_2.fastq.gz"),
+        r1 = temp("results/fastp/{sample}_1.fastq.gz"),
+        r2 = temp("results/fastp/{sample}_2.fastq.gz"),
         fastp_html = "results/fastp/{sample}.html",
         fastp_json = "results/fastp/{sample}.json"
     conda:
-        "Transcriptomics_conda.yaml"
+        "environment.yaml"
     threads:
         10
     log:
@@ -35,8 +35,8 @@ rule fastp:
     shell:
         """
         fastp \
-            --in1 {input.r1i} --in2 {input.r2i} \
-            --out1 {output.r1o} --out2 {output.r2o} \
+            --in1 {input.r1} --in2 {input.r2} \
+            --out1 {output.r1} --out2 {output.r2} \
             --trim_poly_g \
             --trim_poly_x \
             --n_base_limit 5 \
@@ -51,50 +51,47 @@ rule fastp:
         """
 
 ## Index host genomes:
-# rule index_ref:
+# rule STAR_index:
      input:
-         "resources/reference/host"
+            genome="resources/reference/host/XXXXX",
+            annotation="resources/reference/host/XXXXX"
      output:
-         bt2_index = "resources/reference/host/CattedRefs.fna.gz.rev.2.bt2l",
-         catted_ref = "resources/reference/host/CattedRefs.fna.gz"
+            folder=directory("resources/reference/host/index")
      conda:
-         "1_QC.yaml"
+         "environment.yaml"
      threads:
          40
      log:
-         "3_Outputs/0_Logs/host_genome_indexing.log"
+         "logs/star_index.log"
      message:
-         "Concatenating and indexing host genomes with Bowtie2"
+         "Indexing host genome"
      shell:
          """
-         # Concatenate input reference genomes
-         cat {input}/*.gz > {input}/CattedRefs.fna.gz
-
-         # Index catted genomes
-         bowtie2-build \
-             --large-index \
-             --threads {threads} \
-             {output.catted_ref} {output.catted_ref} \
-         &> {log}
+        STAR \
+            --runMode genomeGenerate \
+            --runThreadN {threads} \
+            --genomeDir {output.folder} \
+            --genomeFastaFiles {input.genome} \
+            --sjdbGTFfile {input.annotation} \
+        2> {log} 1>&2
          """
 
 ### Map to host reference genome using STAR
 rule STAR_host_mapping:
     input:
-        r1i = "results/fastp/{sample}_1.fastq.gz",
-        r2i = "results/fastp/{sample}_2.fastq.gz"
+        r1 = "results/fastp/{sample}_1.fastq.gz",
+        r2 = "results/fastp/{sample}_2.fastq.gz",
+        index = "resources/reference/host/index"
     output:
-        non_host_r1 = "results/star/{sample}_1.fastq.gz",
-        non_host_r2 = "results/star/{sample}_2.fastq.gz",
+        r1 = "results/star/{sample}_1.fastq.gz",
+        r2 = "results/star/{sample}_2.fastq.gz",
         host_bam = "results/star/{sample}_host.bam"
     params:
-        r1rn = "results/star/{sample}_1.fastq",
-        r2rn = "results/star/{sample}_2.fastq",
         gene_counts = "results/star/{sample}_read_counts.tsv",
         sj = "results/star/{sample}_SJ.tsv",
         host_genome = "resources/reference/XXXXXXX",
     conda:
-        "Transcriptomics_conda.yaml"
+        "environment.yaml"
     threads:
         40
     log:
@@ -107,8 +104,8 @@ rule STAR_host_mapping:
         STAR \
             --runMode alignReads \
             --runThreadN {threads} \
-            --genomeDir {params.host_genome} \
-            --readFilesIn {input.r1i} {input.r2i} \
+            --genomeDir {input.index} \
+            --readFilesIn {input.r1} {input.r2} \
             --outFileNamePrefix {wildcards.sample} \
             --outSAMtype BAM Unsorted \
             --outReadsUnmapped Fastx \
@@ -120,8 +117,8 @@ rule STAR_host_mapping:
         mv {wildcards.sample}Aligned.out.bam {output.host_bam}
         mv {wildcards.sample}ReadsPerGene.out.tab {params.gene_counts}
         mv {wildcards.sample}SJ.out.tab {params.sj}
-        mv {wildcards.sample}Unmapped.out.mate1 {params.r1rn}
-        mv {wildcards.sample}Unmapped.out.mate2 {params.r2rn}
+        mv {wildcards.sample}Unmapped.out.mate1 {output.r1}
+        mv {wildcards.sample}Unmapped.out.mate2 {output.r2}
 
         # Compress non-host reads
         pigz \
@@ -131,16 +128,12 @@ rule STAR_host_mapping:
         pigz \
             -p {threads} \
             {params.r2rn}
-
-        # Clean up unwanted outputs
-        rm -r {wildcards.sample}_STARtmp
-        rm {wildcards.sample}*out*
         """
 
 ### Functionally annotate MAGs with DRAM
 rule DRAM:
     input:
-        "resources/reference/MAGs.fa"
+        "resources/reference/microbiome/MAGs.fa"
     output:
         annotations = "results/dram/MAGs_annotations.tsv.gz",
         genes = "results/dram/MAGs_genes.fna.gz",
@@ -151,7 +144,7 @@ rule DRAM:
         distillate = directory("results/dram/MAGs_distillate")
     params:
         outdir = "results/dram/MAGs_annotate",
-        mainout = "results/dramM",
+        mainout = "results/dram",
         trnas = "results/dram/MAGs_trnas.tsv.gz",
         rrnas = "results/dram/MAGs_rrnas.tsv.gz",
     threads:
@@ -231,16 +224,16 @@ rule DRAM:
 ## Index MAGs:
 rule index_MAGs:
     input:
-        "resources/reference/MAGs_genes.fna.gz"
+        "resources/reference/microbiome/MAGs_genes.fna.gz"
     output:
-        bt2_index = "resources/reference/MAGs_genes.fna.gz.rev.2.bt2l",
-        MAG_genes = "resources/reference/MAGs_genes.fna.gz"
+        bt2_index = "resources/reference/microbiome/MAGs_genes.fna.gz.rev.2.bt2l",
+        MAG_genes = "resources/reference/microbiome/MAGs_genes.fna.gz"
     conda:
-        "Transcriptomics_conda.yaml"
+        "environment.yaml"
     threads:
         40
     log:
-        "3_Outputs/0_Logs/MAG_genes_bowtie2_indexing.log"
+        "logs/MAG_genes_index.log"
     message:
         "Indexing MAG catalogue with Bowtie2"
     shell:
@@ -260,15 +253,15 @@ rule index_MAGs:
 ### Map non-host reads to DRAM genes files using Bowtie2
 rule bowtie2_MAG_mapping:
     input:
-        non_host_r1 = "results/star/{sample}_1.fastq.gz",
-        non_host_r2 = "results/star/{sample}_2.fastq.gz",
-        bt2_index = "resources/reference/MAG_genes.fna.gz.rev.2.bt2l"
+        r1 = "results/star/{sample}_1.fastq.gz",
+        r2 = "results/star/{sample}_2.fastq.gz",
+        bt2_index = "resources/reference/microbiome/MAG_genes.fna.gz.rev.2.bt2l"
     output:
         bam = "results/bowtie/{sample}.bam"
     params:
-        MAG_genes = "1_References/MAG_genes.fna.gz"
+        MAG_genes = "resources/reference/microbiome/MAG_genes.fna.gz"
     conda:
-        "Transcriptomics_conda.yaml"
+        "environment.yaml"
     threads:
         20
     log:
@@ -282,8 +275,8 @@ rule bowtie2_MAG_mapping:
             --time \
             --threads {threads} \
             -x {params.MAG_genes} \
-            -1 {input.non_host_r1} \
-            -2 {input.non_host_r2} \
+            -1 {input.r1} \
+            -2 {input.r2} \
             --seed 1337 \
         | samtools sort -@ {threads} -o {output.bam} \
         &> {log}
@@ -297,7 +290,7 @@ rule coverM_MAG_genes:
         gene_counts = "results/coverm/gene_counts.tsv",
     params:
     conda:
-        "Transcriptomics_conda.yaml"
+        "environment.yaml"
     threads:
         40
     message:
