@@ -179,7 +179,9 @@ rule dram:
     shell:
         """
         source activate /projects/mjolnir1/people/ncl550/0_software/miniconda3/envs/DRAM_more_modules
-        
+
+        rm {params.outdir}
+
         DRAM.py annotate \
             -i {input} \
             -o {params.outdir} \
