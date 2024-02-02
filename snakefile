@@ -159,7 +159,7 @@ rule dram:
     log:
         "logs/dram.log"
     message:
-        "Using DRAM to functionally annotate {wildcards.MAG}"
+        "Using DRAM to functionally annotate mags"
     shell:
         """
         source activate /projects/mjolnir1/people/ncl550/0_software/miniconda3/envs/DRAM_more_modules
