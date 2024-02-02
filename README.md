@@ -46,7 +46,6 @@ snakemake \
     --rerun-incomplete \
     --jobs 20 \
     --cluster 'sbatch -o logs/{params.jobname}-slurm-%j.out --mem {resources.mem_gb}G --time {resources.time} -c {threads} --job-name={params.jobname} -v'
-    --job-name={params.jobname} \
     --keep-going \
     --notemp \
     --slurm \
