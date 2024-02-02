@@ -228,9 +228,9 @@ rule dram:
 ## Index MAGs:
 rule index_mags:
     input:
-        "resources/reference/microbiome/MAGs_genes.fna.gz"
+        "results/dram/MAGs_genes.fna.gz"
     output:
-        "resources/reference/microbiome/index/MAGs_genes"
+        "results/dram/MAGs_genes"
     conda:
         "environment.yaml"
     threads:
@@ -258,7 +258,7 @@ rule bowtie2_MAG_mapping:
     input:
         r1 = "results/star/{sample}_1.fq.gz",
         r2 = "results/star/{sample}_2.fq.gz",
-        bt2_index = "resources/reference/microbiome/index/MAGs_genes"
+        bt2_index = "results/dram/MAGs_genes"
     output:
         bam = "results/bowtie/{sample}.bam"
     params:
