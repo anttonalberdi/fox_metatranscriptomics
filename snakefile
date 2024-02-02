@@ -7,6 +7,7 @@ SAMPLE = [os.path.basename(fn).replace("_1.fastq.gz", "")
 
 print("Detected the following samples:")
 print(SAMPLE)
+
 ################################################################################
 ### Setup the desired outputs
 rule all:
@@ -50,8 +51,9 @@ rule fastp:
         &> {log}
         """
 
+################################################################################
 ## Index host genomes:
-# rule STAR_index:
+rule star_index:
      input:
             genome="resources/reference/host/XXXXX",
             annotation="resources/reference/host/XXXXX"
@@ -76,8 +78,9 @@ rule fastp:
         2> {log} 1>&2
          """
 
+################################################################################
 ### Map to host reference genome using STAR
-rule STAR_host_mapping:
+rule star_mapping:
     input:
         r1 = "results/fastp/{sample}_1.fastq.gz",
         r2 = "results/fastp/{sample}_2.fastq.gz",
@@ -130,8 +133,9 @@ rule STAR_host_mapping:
             {params.r2rn}
         """
 
+################################################################################
 ### Functionally annotate MAGs with DRAM
-rule DRAM:
+rule dram:
     input:
         "resources/reference/microbiome/MAGs.fa"
     output:
@@ -222,7 +226,7 @@ rule DRAM:
 
 ################################################################################
 ## Index MAGs:
-rule index_MAGs:
+rule index_mags:
     input:
         "resources/reference/microbiome/MAGs_genes.fna.gz"
     output:
@@ -281,6 +285,7 @@ rule bowtie2_MAG_mapping:
         | samtools sort -@ {threads} -o {output.bam} \
         &> {log}
         """
+
 ################################################################################
 ### Calculate the number of reads that mapped to MAG catalogue genes with CoverM
 rule coverM_MAG_genes:
