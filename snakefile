@@ -230,8 +230,7 @@ rule index_mags:
     input:
         "resources/reference/microbiome/MAGs_genes.fna.gz"
     output:
-        bt2_index = "resources/reference/microbiome/MAGs_genes.fna.gz.rev.2.bt2l",
-        MAG_genes = "resources/reference/microbiome/MAGs_genes.fna.gz"
+        "resources/reference/microbiome/index/MAGs_genes"
     conda:
         "environment.yaml"
     threads:
@@ -249,7 +248,7 @@ rule index_mags:
         bowtie2-build \
             --large-index \
             --threads {threads} \
-            {output.MAG_genes} {output.MAG_genes} \
+            {input} {output} \
         &> {log}
         """
         
@@ -259,7 +258,7 @@ rule bowtie2_MAG_mapping:
     input:
         r1 = "results/star/{sample}_1.fq.gz",
         r2 = "results/star/{sample}_2.fq.gz",
-        bt2_index = "resources/reference/microbiome/MAGs_genes.fna.gz.rev.2.bt2l"
+        bt2_index = "resources/reference/microbiome/index/MAGs_genes"
     output:
         bam = "results/bowtie/{sample}.bam"
     params:
