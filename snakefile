@@ -259,7 +259,7 @@ rule bowtie2_MAG_mapping:
     input:
         r1 = "results/star/{sample}_1.fq.gz",
         r2 = "results/star/{sample}_2.fq.gz",
-        bt2_index = "resources/reference/microbiome/MAG_genes.fna.gz.rev.2.bt2l"
+        bt2_index = "resources/reference/microbiome/MAGs_genes.fna.gz.rev.2.bt2l"
     output:
         bam = "results/bowtie/{sample}.bam"
     params:
