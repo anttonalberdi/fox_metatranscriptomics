@@ -18,11 +18,11 @@ rule all:
 ### Filter reads with fastp
 rule fastp:
     input:
-        r1 = "resources/reads/{sample}_1.fastq.gz",
-        r2 = "resources/reads/{sample}_2.fastq.gz"
+        r1 = "resources/reads/{sample}_1.fq.gz",
+        r2 = "resources/reads/{sample}_2.fq.gz"
     output:
-        r1 = temp("results/fastp/{sample}_1.fastq.gz"),
-        r2 = temp("results/fastp/{sample}_2.fastq.gz"),
+        r1 = temp("results/fastp/{sample}_1.fq.gz"),
+        r2 = temp("results/fastp/{sample}_2.fq.gz"),
         fastp_html = "results/fastp/{sample}.html",
         fastp_json = "results/fastp/{sample}.json"
     conda:
@@ -82,12 +82,12 @@ rule star_index:
 ### Map to host reference genome using STAR
 rule star_mapping:
     input:
-        r1 = "results/fastp/{sample}_1.fastq.gz",
-        r2 = "results/fastp/{sample}_2.fastq.gz",
+        r1 = "results/fastp/{sample}_1.fq.gz",
+        r2 = "results/fastp/{sample}_2.fq.gz",
         index = "resources/reference/host/index"
     output:
-        r1 = "results/star/{sample}_1.fastq.gz",
-        r2 = "results/star/{sample}_2.fastq.gz",
+        r1 = "results/star/{sample}_1.fq.gz",
+        r2 = "results/star/{sample}_2.fq.gz",
         host_bam = "results/star/{sample}_host.bam"
     params:
         gene_counts = "results/star/{sample}_read_counts.tsv",
@@ -257,8 +257,8 @@ rule index_mags:
 ### Map non-host reads to DRAM genes files using Bowtie2
 rule bowtie2_MAG_mapping:
     input:
-        r1 = "results/star/{sample}_1.fastq.gz",
-        r2 = "results/star/{sample}_2.fastq.gz",
+        r1 = "results/star/{sample}_1.fq.gz",
+        r2 = "results/star/{sample}_2.fq.gz",
         bt2_index = "resources/reference/microbiome/MAG_genes.fna.gz.rev.2.bt2l"
     output:
         bam = "results/bowtie/{sample}.bam"
