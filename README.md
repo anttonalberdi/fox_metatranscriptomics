@@ -1,4 +1,4 @@
-# fox_metatranscriptomics
+# Fox metatranscriptomics
 Repository for the fox metatranscriptomic analysis
 
 ## Prepare working environment
