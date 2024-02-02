@@ -70,9 +70,9 @@ rule star_index:
         jobname = "star_index",
      threads:
          24
-    resources:
-        mem_gb=24,
-        time='02:00:00'
+     resources:
+         mem_gb=24,
+         time='02:00:00'
      log:
          "logs/star_index.log"
      message:
