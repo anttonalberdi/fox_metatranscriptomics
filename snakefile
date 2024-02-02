@@ -27,8 +27,13 @@ rule fastp:
         fastp_json = "results/fastp/{sample}.json"
     conda:
         "environment.yaml"
+    params:
+        jobname = "fastp_{sample}",
     threads:
         10
+    resources:
+        mem_gb=24,
+        time='01:00:00'
     log:
         "logs/{sample}_fastp.log"
     message:
@@ -61,8 +66,13 @@ rule star_index:
             folder=directory("resources/reference/host/index")
      conda:
          "environment.yaml"
+     params:
+        jobname = "star_index",
      threads:
-         40
+         24
+    resources:
+        mem_gb=24,
+        time='02:00:00'
      log:
          "logs/star_index.log"
      message:
@@ -90,6 +100,7 @@ rule star_mapping:
         r2 = "results/star/{sample}_2.fq.gz",
         host_bam = "results/star/{sample}_host.bam"
     params:
+        jobname = "star_{sample}",
         r1 = "results/star/{sample}_1.fq.",
         r2 = "results/star/{sample}_2.fq",
         gene_counts = "results/star/{sample}_read_counts.tsv",
@@ -97,7 +108,10 @@ rule star_mapping:
     conda:
         "environment.yaml"
     threads:
-        40
+        24
+    resources:
+        mem_gb=24,
+        time='02:00:00'
     log:
         "logs/{sample}_star.log"
     message:
@@ -148,6 +162,7 @@ rule dram:
         gbk = "results/dram/MAGs.gbk.gz",
         distillate = directory("results/dram/MAGs_distillate")
     params:
+        jobname = "dram",
         outdir = "results/dram/MAGs_annotate",
         mainout = "results/dram",
         trnas = "results/dram/MAGs_trnas.tsv.gz",
@@ -234,8 +249,13 @@ rule index_mags:
         "results/dram/MAGs_genes"
     conda:
         "environment.yaml"
+    params:
+        jobname = "mags_index",
     threads:
-        40
+        24
+    resources:
+        mem_gb=24,
+        time='02:00:00'
     log:
         "logs/MAG_genes_index.log"
     message:
@@ -260,11 +280,15 @@ rule bowtie2_MAG_mapping:
     output:
         bam = "results/bowtie/{sample}.bam"
     params:
+        jobname = "mags_{sample}",
         MAG_genes = "resources/reference/microbiome/MAG_genes.fna.gz"
     conda:
         "environment.yaml"
     threads:
         20
+    resources:
+        mem_gb=24,
+        time='02:00:00'
     log:
         "logs/{sample}_bowtie.log"
     message:
@@ -291,10 +315,14 @@ rule coverM_MAG_genes:
     output:
         gene_counts = "results/coverm/gene_counts.tsv",
     params:
+        jobname = "coverm"
     conda:
         "environment.yaml"
     threads:
-        40
+        24
+    resources:
+        mem_gb=24,
+        time='01:00:00'
     message:
         "Calculating MAG gene mapping rate using CoverM"
     shell:
