@@ -155,7 +155,7 @@ rule dram:
     threads:
         2
     resources:
-        mem_gb=24,
+        mem_gb=128,
         time='04:00:00'
     log:
         "logs/dram.log"
