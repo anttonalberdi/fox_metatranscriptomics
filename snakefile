@@ -94,8 +94,8 @@ rule star_mapping:
         r2 = "results/star/{sample}_2.fq",
         gene_counts = "results/star/{sample}_read_counts.tsv",
         sj = "results/star/{sample}_SJ.tsv"
-     conda:
-         "environment.yaml"
+    conda:
+        "environment.yaml"
     threads:
         40
     log:
@@ -242,9 +242,6 @@ rule index_mags:
         "Indexing MAG catalogue with Bowtie2"
     shell:
         """
-        # Rename MAG gene catalogue
-        mv {input} {output.MAG_genes}
-
         # Index MAG gene catalogue
         bowtie2-build \
             --large-index \
