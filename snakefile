@@ -105,7 +105,7 @@ rule star_mapping:
     params:
         jobname = "star_{sample}",
         indexdir = "resources/reference/host/",
-        r1 = "results/star/{sample}_1.fq.",
+        r1 = "results/star/{sample}_1.fq",
         r2 = "results/star/{sample}_2.fq",
         gene_counts = "results/star/{sample}_read_counts.tsv",
         sj = "results/star/{sample}_SJ.tsv"
@@ -252,11 +252,12 @@ rule index_mags:
     input:
         "results/dram/MAGs_genes.fna.gz"
     output:
-        "results/dram/MAGs_genes"
+        touch("results/dram/index.txt") # Flag file
     conda:
         "environment.yaml"
     params:
         jobname = "mags_index",
+        index = "results/dram/MAGs_genes"
     threads:
         24
     resources:
@@ -272,7 +273,7 @@ rule index_mags:
         bowtie2-build \
             --large-index \
             --threads {threads} \
-            {input} {output} \
+            {input} {params.index} \
         &> {log}
         """
         
@@ -282,12 +283,12 @@ rule bowtie2_MAG_mapping:
     input:
         r1 = "results/star/{sample}_1.fq.gz",
         r2 = "results/star/{sample}_2.fq.gz",
-        bt2_index = "results/dram/MAGs_genes"
+        index = "results/dram/index.txt"
     output:
         bam = "results/bowtie/{sample}.bam"
     params:
         jobname = "mags_{sample}",
-        MAG_genes = "resources/reference/microbiome/MAG_genes.fna.gz"
+        index = "results/dram/MAGs_genes"
     conda:
         "environment.yaml"
     threads:
@@ -305,7 +306,7 @@ rule bowtie2_MAG_mapping:
         bowtie2 \
             --time \
             --threads {threads} \
-            -x {params.MAG_genes} \
+            -x {params.index} \
             -1 {input.r1} \
             -2 {input.r2} \
             --seed 1337 \
