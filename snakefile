@@ -112,10 +112,10 @@ rule star_mapping:
     conda:
         "environment.yaml"
     threads:
-        24
+        1
     resources:
         mem_gb=96,
-        time='02:00:00'
+        time='05:00:00'
     log:
         "logs/{sample}_star.log"
     message:
@@ -130,7 +130,6 @@ rule star_mapping:
             --readFilesIn {input.r1} {input.r2} \
             --outFileNamePrefix {wildcards.sample} \
             --outTmpDir tmp \
-            --limitGenomeGenerateRAM 80000000000 \
             --outSAMtype BAM Unsorted \
             --outReadsUnmapped Fastx \
             --readFilesCommand zcat \
