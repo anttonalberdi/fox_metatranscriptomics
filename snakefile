@@ -175,7 +175,7 @@ rule dram:
         2
     resources:
         mem_gb=128,
-        time='04:00:00'
+        time='10:00:00'
     log:
         "logs/dram.log"
     message:
