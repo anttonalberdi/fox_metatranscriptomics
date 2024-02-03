@@ -129,6 +129,8 @@ rule star_mapping:
             --genomeDir {params.indexdir} \
             --readFilesIn {input.r1} {input.r2} \
             --outFileNamePrefix {wildcards.sample} \
+            --outTmpDir tmp \
+            --limitGenomeGenerateRAM 80000000000 \
             --outSAMtype BAM Unsorted \
             --outReadsUnmapped Fastx \
             --readFilesCommand zcat \
