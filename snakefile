@@ -63,11 +63,12 @@ rule star_index:
             genome="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.fna",
             annotation="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.gtf"
      output:
-            folder=directory("resources/reference/host/index")
+            touch("resources/reference/host/index.done") # Flag file
      conda:
          "environment.yaml"
      params:
         jobname = "star_index",
+        indexdir = "resources/reference/host/",
      threads:
          24
      resources:
@@ -83,7 +84,7 @@ rule star_index:
         STAR \
             --runMode genomeGenerate \
             --runThreadN {threads} \
-            --genomeDir {output.folder} \
+            --genomeDir {params.indexdir} \
             --genomeFastaFiles {input.genome} \
             --sjdbGTFfile {input.annotation} \
         2> {log} 1>&2
@@ -95,13 +96,14 @@ rule star_mapping:
     input:
         r1 = "results/fastp/{sample}_1.fq.gz",
         r2 = "results/fastp/{sample}_2.fq.gz",
-        index = "resources/reference/host/index"
+        index = "resources/reference/host/index.done"
     output:
         r1 = "results/star/{sample}_1.fq.gz",
         r2 = "results/star/{sample}_2.fq.gz",
         host_bam = "results/star/{sample}_host.bam"
     params:
         jobname = "star_{sample}",
+        indexdir = "resources/reference/host/",
         r1 = "results/star/{sample}_1.fq.",
         r2 = "results/star/{sample}_2.fq",
         gene_counts = "results/star/{sample}_read_counts.tsv",
@@ -123,7 +125,7 @@ rule star_mapping:
         STAR \
             --runMode alignReads \
             --runThreadN {threads} \
-            --genomeDir {input.index} \
+            --genomeDir {params.indexdir} \
             --readFilesIn {input.r1} {input.r2} \
             --outFileNamePrefix {wildcards.sample} \
             --outSAMtype BAM Unsorted \
