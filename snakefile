@@ -85,6 +85,7 @@ rule star_index:
             --runMode genomeGenerate \
             --runThreadN {threads} \
             --genomeDir {params.indexdir} \
+            --limitGenomeGenerateRAM 80000000000 \
             --genomeFastaFiles {input.genome} \
             --sjdbGTFfile {input.annotation} \
         2> {log} 1>&2
