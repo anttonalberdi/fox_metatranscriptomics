@@ -114,7 +114,7 @@ rule star_mapping:
     threads:
         24
     resources:
-        mem_gb=24,
+        mem_gb=96,
         time='02:00:00'
     log:
         "logs/{sample}_star.log"
