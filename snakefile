@@ -63,7 +63,7 @@ rule star_index:
             genome="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.fna",
             annotation="resources/reference/host/GCF_003160815.1_VulVul2.2_genomic.gtf"
      output:
-            touch("resources/reference/host/index.done") # Flag file
+            touch("resources/reference/host/done.txt") # Flag file
      conda:
          "environment.yaml"
      params:
@@ -97,7 +97,7 @@ rule star_mapping:
     input:
         r1 = "results/fastp/{sample}_1.fq.gz",
         r2 = "results/fastp/{sample}_2.fq.gz",
-        index = "resources/reference/host/index.done"
+        index = "resources/reference/host/done.txt"
     output:
         r1 = "results/star/{sample}_1.fq.gz",
         r2 = "results/star/{sample}_2.fq.gz",
