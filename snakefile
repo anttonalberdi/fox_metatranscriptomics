@@ -158,19 +158,19 @@ rule dram:
     input:
         "resources/reference/microbiome/MAGs.fa"
     output:
-        annotations = "results/dram/MAGs_annotations.tsv.gz",
-        genes = "results/dram/MAGs_genes.fna.gz",
-        genesfaa = "results/dram/MAGs_genes.faa.gz",
-        genesgff = "results/dram/MAGs_genes.gff.gz",
-        scaffolds = "results/dram/MAGs_scaffolds.fna.gz",
-        gbk = "results/dram/MAGs.gbk.gz",
+        annotations = "results/dram/MAGs_annotations.tsv",
+        genes = "results/dram/MAGs_genes.fna",
+        genesfaa = "results/dram/MAGs_genes.faa",
+        genesgff = "results/dram/MAGs_genes.gff",
+        scaffolds = "results/dram/MAGs_scaffolds.fna",
+        gbk = "results/dram/MAGs.gbk",
         distillate = directory("results/dram/MAGs_distillate")
     params:
         jobname = "dram",
         outdir = "results/dram/MAGs_annotate",
         mainout = "results/dram",
-        trnas = "results/dram/MAGs_trnas.tsv.gz",
-        rrnas = "results/dram/MAGs_rrnas.tsv.gz",
+        trnas = "results/dram/MAGs_trnas.tsv",
+        rrnas = "results/dram/MAGs_rrnas.tsv",
     threads:
         2
     resources:
@@ -230,18 +230,11 @@ rule dram:
 
         fi    
 
-        pigz -p {threads} {params.outdir}/*.tsv
-        pigz -p {threads} {params.outdir}/*.fna
-        pigz -p {threads} {params.outdir}/*.faa
-        pigz -p {threads} {params.outdir}/*.gff
-        pigz -p {threads} {params.outdir}/genbank/*
-        pigz -p {threads} {output.distillate}/*
-
-        mv {params.outdir}/annotations.tsv.gz {output.annotations}
-        mv {params.outdir}/scaffolds.fna.gz {output.scaffolds}
-        mv {params.outdir}/genes.fna.gz {output.genes}
-        mv {params.outdir}/*.faa.gz {output.genesfaa}
-        mv {params.outdir}/*.gff.gz {output.genesgff}
+        mv {params.outdir}/annotations.tsv {output.annotations}
+        mv {params.outdir}/scaffolds.fna {output.scaffolds}
+        mv {params.outdir}/genes.fna {output.genes}
+        mv {params.outdir}/*.faa {output.genesfaa}
+        mv {params.outdir}/*.gff {output.genesgff}
         mv {params.outdir}/genbank/* {output.gbk}
 
         """
