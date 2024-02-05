@@ -243,7 +243,7 @@ rule dram:
 ## Index MAGs:
 rule index_mags:
     input:
-        "results/dram/MAGs_genes.fna.gz"
+        "results/dram/MAGs_genes.fna"
     output:
         touch("results/dram/index.txt") # Flag file
     conda:
