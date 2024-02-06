@@ -139,17 +139,9 @@ rule star_mapping:
         mv {wildcards.sample}Aligned.out.bam {output.host_bam}
         mv {wildcards.sample}ReadsPerGene.out.tab {params.gene_counts}
         mv {wildcards.sample}SJ.out.tab {params.sj}
-        mv {wildcards.sample}Unmapped.out.mate1 {params.r1}
-        mv {wildcards.sample}Unmapped.out.mate2 {params.r2}
+        mv {wildcards.sample}Unmapped.out.mate1 {output.r1}
+        mv {wildcards.sample}Unmapped.out.mate2 {output.r2}
 
-        # Compress non-host reads
-        pigz \
-            -p {threads} \
-            {output.r1}
-
-        pigz \
-            -p {threads} \
-            {output.r1}
         """
 
 ################################################################################
@@ -274,8 +266,8 @@ rule index_mags:
 ### Map non-host reads to DRAM genes files using Bowtie2
 rule bowtie2_MAG_mapping:
     input:
-        r1 = "results/star/{sample}_1.fq.gz",
-        r2 = "results/star/{sample}_2.fq.gz",
+        r1 = "results/star/{sample}_1.fq",
+        r2 = "results/star/{sample}_2.fq",
         index = "results/dram/index.txt"
     output:
         bam = "results/bowtie/{sample}.bam"
