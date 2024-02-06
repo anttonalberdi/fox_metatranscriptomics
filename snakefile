@@ -115,7 +115,7 @@ rule star_mapping:
         1
     resources:
         mem_gb=96,
-        time='05:00:00'
+        time='08:00:00'
     log:
         "logs/{sample}_star.log"
     message:
@@ -175,7 +175,7 @@ rule dram:
         2
     resources:
         mem_gb=128,
-        time='10:00:00'
+        time='24:00:00'
     log:
         "logs/dram.log"
     message:
