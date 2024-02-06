@@ -99,8 +99,8 @@ rule star_mapping:
         r2 = "results/fastp/{sample}_2.fq.gz",
         index = "resources/reference/host/done.txt"
     output:
-        r1 = "results/star/{sample}_1.fq.gz",
-        r2 = "results/star/{sample}_2.fq.gz",
+        r1 = "results/star/{sample}_1.fq",
+        r2 = "results/star/{sample}_2.fq",
         host_bam = "results/star/{sample}_host.bam"
     params:
         jobname = "star_{sample}",
