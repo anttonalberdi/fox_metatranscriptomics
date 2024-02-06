@@ -48,5 +48,5 @@ snakemake \
     --cluster 'sbatch -o logs/{params.jobname}-slurm-%j.out --mem {resources.mem_gb}G --time {resources.time} -c {threads} --job-name={params.jobname} -v'
     --notemp \
     --slurm \
-    --latency-wait 60
+    --latency-wait 600
 ```
